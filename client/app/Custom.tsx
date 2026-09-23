@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLoadUserQuery } from "@/redux/features/api/apiSlice"; // use your correct path
 import Loader from "./components/Loader/Loader"
 
@@ -9,14 +9,18 @@ type Props = {
 };
 
 const Custom = ({ children }: Props) => {
- const {isLoading} = useLoadUserQuery({});
-  return(
-    <>
-    {
-      isLoading ? <Loader/>  : <>{children} </>
-    }
-    </>
-  )
-};
+  const [mounted, setMounted] = useState(false);
 
+  const { isLoading } = useLoadUserQuery({});
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isLoading) {
+    return <Loader />;
+  }
+
+  return <>{children}</>;
+};
 export default Custom;

@@ -29,10 +29,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${poppins.variable} ${josefin.variable} min-h-screen antialiased !bg-white bg-no-repeat dark:bg-gradient-to-b dark:from-gray-900 dark:to-black duration-300`}
-    >
+      <html
+       lang="en"
+       suppressHydrationWarning
+       className={`${poppins.variable} ${josefin.variable} min-h-screen antialiased !bg-white bg-no-repeat dark:bg-gradient-to-b dark:from-gray-900 dark:to-black duration-300`}
+        >
       <body className="min-h-screen flex flex-col ">
         <Providers>
           <Custom>
@@ -43,3 +44,8 @@ export default function RootLayout({
     </html>
   );
 }
+
+{/*<html
+      lang="en"
+      className={`${poppins.variable} ${josefin.variable} min-h-screen antialiased !bg-white bg-no-repeat dark:bg-gradient-to-b dark:from-gray-900 dark:to-black duration-300`}
+    > */}

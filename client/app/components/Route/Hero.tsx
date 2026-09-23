@@ -18,9 +18,10 @@ const {data}= useGetHeroDataQuery("Banner");
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] sm:h-[450px] sm:w-[450px] lg:h-[550px] lg:w-[550px] xl:h-[650px] xl:w-[650px] hero_animation rounded-full z-10" />
         
         <Image
-          src={data?.layout?.banner?.image?.url}
+          src={data?.layout?.banner?.image?.url   ?? require("../../../public/assets/banner-img-1.png")} 
           width={400}
           height={400}
+          loading="eager"
           alt="Hero Banner"
           className="object-contain w-[80%] max-w-[500px] lg:max-w-[90%] h-auto relative z-10"
         />
