@@ -1,4 +1,4 @@
-'use client'
+
 import CourseDetailsPage from  "../../components/Course/CourseDetailsPage"
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {

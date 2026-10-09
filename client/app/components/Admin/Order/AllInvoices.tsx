@@ -75,47 +75,7 @@ const columns: any = [
 ];
 
 const rows: any = [
-  // mock data for testing
-  {
-    id:"1234556777655",
-    userName: "Shahriar Sajeeb",
-    userEmail: "programmershahriarsajeeb@gmail.com",
-    title: "React JS Course",
-    price: "$500",
-    created_at: "2 days ago"
-  },
-  {
-    id:"1234556777655",
-    userName: "Shahriar Sajeeb",
-    userEmail: "programmershahriarsajeeb@gmail.com",
-    title: "React JS Course",
-    price: "$500",
-    created_at: "2 days ago"
-  },
-  {
-    id:"1234556777655",
-    userName: "Shahriar Sajeeb",
-    userEmail: "programmershahriarsajeeb@gmail.com",
-    title: "React JS Course",
-    price: "$500",
-    created_at: "2 days ago"
-  },
-  {
-    id:"1234556777655",
-    userName: "Shahriar Sajeeb",
-    userEmail: "programmershahriarsajeeb@gmail.com",
-    title: "React JS Course",
-    price: "$500",
-    created_at: "2 days ago"
-  },
-  {
-    id:"1234556777655",
-    userName: "Shahriar Sajeeb",
-    userEmail: "programmershahriarsajeeb@gmail.com",
-    title: "React JS Course",
-    price: "$500",
-    created_at: "2 days ago"
-  },
+  
 ]
 
 orderData &&
@@ -146,7 +106,7 @@ orderData &&
           checkboxSelection={!isDashboard}
           rows={rows}
           columns={columns}
-          components={isDashboard ? {} : { Toolbar: GridToolbar }}
+          slots={isDashboard ? {} : { toolbar: GridToolbar }}
           sx={{
             "--DataGrid-containerBackground":
               theme === "dark" ? "#3e4396" : "#A4A9FC",

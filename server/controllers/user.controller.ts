@@ -33,6 +33,7 @@ export const registrationUser = CatchAsyncError(
       if (isEmailExist) {
         return next(new ErrorHandler("Email already exist", 400));
       }
+      console.log(name, email, password, "🔥 Registration details received");
       const user: IRegistrationBody = {
         name,
         email,
@@ -59,7 +60,8 @@ export const registrationUser = CatchAsyncError(
           activationToken: activationToken.token,
         });
       } catch (error: any) {
-        return next(new ErrorHandler(error.message, 400));
+        console.log("🔥 EMAIL ERROR:", error);
+        return next(new ErrorHandler(error.message, 500));
       }
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));

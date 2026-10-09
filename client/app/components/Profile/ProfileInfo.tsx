@@ -22,26 +22,17 @@ const ProfileInfo: FC<Props> = ({ avatar, user }) => {
   const {} = useLoadUserQuery(undefined, {skip: loadUser ? false : true})
 
   const imageHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-  console.log("🔥 IMAGE HANDLER FIRED");
-
   const file = e.target.files?.[0];
 
-  console.log("📁 SELECTED FILE:", file);
-
   if (!file) {
-    console.log("❌ No file selected");
     return;
   }
-
-  console.log("🔥 CALLING UPDATE AVATAR");
 
   const fileReader = new FileReader();
 
   fileReader.onload = () => {
     if (fileReader.readyState === 2) {
       const avatar = fileReader.result;
-
-      console.log("🖼️ IMAGE READY:", avatar);
 
       updateAvatar(avatar);
     }

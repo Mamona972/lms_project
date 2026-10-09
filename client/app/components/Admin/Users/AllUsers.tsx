@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import {FiEdit2} from "react-icons/fi"
 import Loader from "../../Loader/Loader";
 import { format } from "timeago.js";
-import { useDeleteUsersMutation, useGetAllUsersQuery, useUpdateUsersMutation } from "@/redux/features/user/userApi";
+import { useDeleteUsersMutation, useGetAllUsersQuery, useUpdateUserRoleMutation, useUpdateUsersMutation } from "@/redux/features/user/userApi";
 import { styles } from "@/app/styles/style";
 import toast from "react-hot-toast";
 

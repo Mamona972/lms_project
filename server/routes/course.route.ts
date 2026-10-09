@@ -9,7 +9,7 @@ courseRouter.put("/edit-course/:id",updateAccessToken,isAuthenticatd,authorizeRo
 courseRouter.get("/get-course/:id",getSingleCourse);
 courseRouter.get("/get-courses",getAllCourses);
 courseRouter.get("/get-course-content/:id",updateAccessToken, isAuthenticatd,getCourseByUser);
-courseRouter.put("/get-question",updateAccessToken, isAuthenticatd,addQuestion);
+courseRouter.put("/add-question",updateAccessToken, isAuthenticatd,addQuestion);
 courseRouter.put("/add-answer",updateAccessToken, isAuthenticatd,addAnswer);
 courseRouter.put("/add-review/:id",updateAccessToken, isAuthenticatd,addReview);
 courseRouter.put("/add-reply",updateAccessToken, isAuthenticatd,authorizeRoles("admin"),addReplyReview)

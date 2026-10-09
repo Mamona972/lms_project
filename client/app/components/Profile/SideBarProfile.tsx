@@ -24,6 +24,8 @@ const SideBarProfile: FC<Props> = ({user,active,setActive,avatar,logOutHandler})
             >
             <Image  src={user.avatar || avatar ? user.avatar.url || avatar: avatarDefault}
             alt=''
+             width={30}
+             height={30}
             className='w-[20px] h-[20px] md:w-[30px] md:[h-[30px] cursor-pointer rounded-full'
             />
             

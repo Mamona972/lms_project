@@ -31,23 +31,22 @@ useEffect(()=>{
       style={{
         paddingTop: "56.25%",
         position: "relative",
-        width: "100%",
+        overflow:"hidden"
       }}
     >
-      {videoData.otp && videoData.playbackInfo && (
+      {videoData.otp && videoData.playbackInfo !=="" && (
         <iframe
           src={`https://player.vdocipher.com/v2/?otp=${videoData.otp}&playbackInfo=${videoData.playbackInfo}`}
           title={title}
           style={{
             border: 0,
-            maxWidth: "100%",
             position: "absolute",
             top: 0,
             left: 0,
             height: "100%",
             width: "100%",
           }}
-          allowFullScreen
+          allowFullScreen={true}
           allow="encrypted-media"
         />
       )}
