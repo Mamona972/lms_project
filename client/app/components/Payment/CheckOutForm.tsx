@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import React, { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import socketIO from "socket.io-client";
-const ENDPOINT = process.env.NEXT_PUBLIC_SOCKET_SERVER_URI || "";
-const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 
 type Props = {
@@ -17,13 +15,33 @@ type Props = {
 };
 
 const CheckOutForm: FC<Props> = ({ setOpen, data ,user}: Props) => {
+  const [socketId, setSocketId] = useState<any>(null);
+
+useEffect(() => {
+  const endpoint = process.env.NEXT_PUBLIC_SOCKET_SERVER_URI;
+  if (!endpoint) return;
+
+  const socket = socketIO(endpoint, {
+    transports: ["websocket"],
+  });
+
+  setSocketId(socket);
+
+  return () => {
+    socket.disconnect();
+  };
+}, []);
+
+
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState<any>("");
   const [createOrder, { data: orderData, error }] = useCreateOrderMutation();
   const [loadUser, setLoadUser] = useState(false);
-  const {} = useLoadUserQuery({ skip: loadUser ? false : true });
+  useLoadUserQuery(undefined, {
+  skip: !loadUser,
+});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: any) => {
@@ -48,11 +66,13 @@ const CheckOutForm: FC<Props> = ({ setOpen, data ,user}: Props) => {
   useEffect(()=>{
     if(orderData){
       setLoadUser(true);
-      socketId.emit("notification", {
-         title: "New order" ,
-         message: `New order for ${data.name}`,
-         userId: user._id,
-        });
+     if (socketId?.connected) {
+  socketId.emit("notification", {
+    title: "New order",
+    message: `New order for ${data.name}`,
+    userId: user._id,
+  });
+}
       router.push(`/course-access/${data._id}`);
     }
     if(error){
@@ -61,7 +81,7 @@ const CheckOutForm: FC<Props> = ({ setOpen, data ,user}: Props) => {
         toast.error(errorMessage.data.message)
       }
     }
-  },[orderData, error])
+  },[orderData, error,socketId, data, user, router])
 
   return (
     <form id="payment-form" onSubmit={handleSubmit} className="w-full" > 

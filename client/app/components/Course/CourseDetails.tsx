@@ -21,7 +21,14 @@ type Props = {
 };
 
 const CourseDetails = ({ data, clientSecret, stripePromise,setRoute,setOpen:openAuthModel }: Props) => {
-  const { data: userData } = useLoadUserQuery(undefined, {});
+  const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+const { data: userData } = useLoadUserQuery(undefined, {
+  skip: !mounted,
+});
   const [user, setUser]= useState<any>();
   const [open, setOpen] = useState(false);
 

@@ -1,10 +1,20 @@
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["expectant-flop-research.ngrok-free.dev"],
 
   images: {
-    domains: ["res.cloudinary.com", "randomuser.me"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "randomuser.me",
+      },
+    ],
   },
 
   async rewrites() {

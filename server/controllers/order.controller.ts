@@ -20,8 +20,6 @@ export const createOrder = CatchAsyncError(
     try {
       const { courseId, payment_info } = req.body as IOrder;
 
-      console.log("========== CREATE ORDER ==========");
-      console.log("courseId:", courseId);
       console.log("payment_info:", payment_info);
 
       // 1. Verify Stripe payment
@@ -56,7 +54,7 @@ export const createOrder = CatchAsyncError(
       // 3. Check if already purchased
       const courseExistInUser = user.courses.some(
         (course: any) =>
-          course._id.toString() === courseId
+          course._id.toString() === courseId.toString()
       );
 
       if (courseExistInUser) {
@@ -115,11 +113,11 @@ export const createOrder = CatchAsyncError(
       }
 
       // 8. Add course to user
-      user.courses.push(course._id);
+      user.courses.push({courseId:course._id.toString()});
 
       // 9. Redis
       await redis.set(
-        req.user?._id,
+        user._id.toString(),
         JSON.stringify(user)
       );
 
@@ -128,7 +126,7 @@ export const createOrder = CatchAsyncError(
 
       // 11. Notification
       await NotificationModel.create({
-        user: user._id,
+        userId: user._id.toString(),
         title: "New Order",
         message: `You have a new order from ${course.name}`,
       });

@@ -2,7 +2,7 @@
 import Loader from '@/app/components/Loader/Loader';
 import { useLoadUserQuery } from '@/redux/features/api/apiSlice';
 import { redirect } from 'next/dist/server/api-utils';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import CourseContent from "../../components/Course/CourseContent"
 import { useRouter } from 'next/navigation';
 type Props = {
@@ -14,7 +14,14 @@ type Props = {
 const Page = ({params}: Props) => {
     const router= useRouter();
     const { id } = React.use(params);
-    const {isLoading,error,data}= useLoadUserQuery(undefined,{})
+    const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+    const { isLoading, error, data } = useLoadUserQuery(undefined, {
+  skip: !mounted,
+});
 
     useEffect(()=>{
         if(data){

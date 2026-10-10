@@ -93,9 +93,16 @@ export const editCourse = CatchAsyncError(
 export const getSingleCourse = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const courseId = req.params.id;
+      const rawCourseId = req.params.id;
+      const courseId = Array.isArray(rawCourseId)
+  ? rawCourseId[0]
+  : rawCourseId;
 
-      const isCacheExist = await redis.get(courseId);
+if (!courseId) {
+  return next(new ErrorHandler("Invalid course ID", 400));
+}
+
+      const isCacheExist = await redis.get(courseId.toString());
       if (isCacheExist) {
         const course = JSON.parse(isCacheExist);
         res.status(200).json({
@@ -107,7 +114,7 @@ export const getSingleCourse = CatchAsyncError(
           "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.link",
         );
         
-        await redis.set(courseId, JSON.stringify(course));
+        await redis.set(courseId.toString(), JSON.stringify(course));
         res.status(200).json({
           success: true,
           course,
@@ -147,7 +154,7 @@ export const getCourseByUser= CatchAsyncError(async(req:Request,res:Response, ne
 const userCourseList= req.user?.courses;
 const courseId= req.params.id;
 
-const courseExists= userCourseList?.find((course:any)=> course._id.toString() === courseId);
+const courseExists= userCourseList?.find((course:any)=> course._id.toString() === courseId.toString());
 
 if(!courseExists){
       return next(new ErrorHandler("you are not eligibal for this course", 404));
@@ -193,7 +200,7 @@ export const addQuestion= CatchAsyncError(async(req:Request, res:Response, next:
   courseContent.questions.push(newQuestion);
 
   await NotificationModel.create({
-        user:req.user?._id,
+        userId: req.user?._id.toString() as string,
         title:"New Question Received",
         message:`You have a new question in ${courseContent.title}`
     })
@@ -251,7 +258,7 @@ export const addAnswer= CatchAsyncError(async(req:Request, res:Response, next:Ne
   if(req.user?._id === question.user._id){
     //create a notification
   await NotificationModel.create({
-        user:req.user?._id,
+        userId: req.user?._id.toString() as string,
         title:"New Question reply Received",
         message:`You have a new question reply in ${courseContent.title}`
     })
@@ -320,11 +327,11 @@ export const addReview= CatchAsyncError(async(req:Request, res:Response, next:Ne
    }
 await course?.save();
 
-await redis.set(courseId, JSON.stringify(course), "EX", 604800);
+await redis.set(courseId.toString(), JSON.stringify(course), "EX", 604800);
 
 //create notificaton
  await NotificationModel.create({
-        user:req.user?._id,
+        userId: req.user?._id.toString() as string,
         title: "New Review Received",
     message:`${req.user?.name} has given a review in ${course?.name}`
  })
@@ -407,7 +414,7 @@ export const deleteCourse= CatchAsyncError(async(req:Request, res:Response, next
    }
 
    await course.deleteOne({id});
-   await redis.del(id);
+   await redis.del(id.toString());
 
    res.status(200).json({
     success: true,

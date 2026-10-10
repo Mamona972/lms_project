@@ -1,11 +1,12 @@
 import mongoose, {Document, Model, Schema} from "mongoose"
-import { exportString } from "node:ffi";
- 
+
 export interface INotification extends Document{
     title:String;
     message:string;
     status:string;
     userId:string;
+    createdAt: Date;
+  updatedAt: Date;
 }
 
 const notificationSchema = new Schema<INotification>({
@@ -21,6 +22,10 @@ const notificationSchema = new Schema<INotification>({
         type:String,
         required:true,
         default:"unread"
+    },
+     userId: {
+      type: String,
+      required: true,
     },
 },{timestamps:true});
 
