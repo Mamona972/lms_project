@@ -16,7 +16,7 @@ const Profile: FC<Props> = ({ user }) => {
   const [avatar, setAvatar]= useState(null);
   const [active, setActive] =useState(1);
   const [logout, setLogout]= useState(false);
-  const [courses, setCourses]= useState([]);
+  const [courses, setCourses]= useState<any[]>([])
   const {data, isLoading}= useGetAllCoursesQuery(undefined,{})
  
   const {}= useLogOutQuery(undefined,{
@@ -38,17 +38,28 @@ const Profile: FC<Props> = ({ user }) => {
     });
   }
 
-  useEffect(() => {
-  if (data) {
-    const filteredCourses = user.courses
-      .map((userCourse: any) =>
-        data.courses.find((course: any) => course._id === userCourse._id)
-      )
-      .filter((course: any) => course !== undefined);
-    setCourses(filteredCourses);
-  }
-}, [data]);
+ 
+useEffect(() => {
+  const allCourses = Array.isArray(data)
+    ? data
+    : data?.courses;
 
+  if (!Array.isArray(allCourses) || !Array.isArray(user?.courses)) {
+    return;
+  }
+
+  const purchasedCourseIds = user.courses.map(
+    (item: any) => String(item.courseId || item._id || item.id)
+  );
+
+  const filteredCourses = allCourses.filter((course: any) =>
+    purchasedCourseIds.includes(String(course._id))
+  );
+
+  console.log("FILTERED PURCHASED COURSES:", filteredCourses);
+
+  setCourses(filteredCourses);
+}, [data, user?.courses]);
   return (
     <div className="w-[85%] flex mx-auto">
       <div
@@ -68,21 +79,27 @@ const Profile: FC<Props> = ({ user }) => {
                 </div>
             )}
 
-        {active === 3 && (
+        
+{active === 3 && (
   <div className="w-full pl-7 px-2 800px:px-10 800px:pl-8">
-    <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-2 lg:gap-[25px] xl:grid-cols-3 xl:gap-[35px]">
-      {courses &&
-        courses.map((item: any, index: number) => (
-          <CourseCard item={item} key={index}  isProfile={true} />
+    {Array.isArray(courses) && courses.length > 0 ? (
+      <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-2 lg:gap-[25px] xl:grid-cols-3 xl:gap-[35px]">
+        {courses.map((item: any) => (
+          <CourseCard
+            item={item}
+            key={item._id || item.id}
+            isProfile={true}
+          />
         ))}
-    </div>
-    {courses.length === 0 && (
+      </div>
+    ) : (
       <h1 className="text-center text-[18px] font-Poppins">
         You don't have any purchased courses!
       </h1>
     )}
   </div>
 )}
+
     </div>
   );
 };

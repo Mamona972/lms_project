@@ -51,20 +51,20 @@ export const createOrder = CatchAsyncError(
         );
       }
 
-      // 3. Check if already purchased
-      const courseExistInUser = user.courses.some(
-        (course: any) =>
-          course._id.toString() === courseId.toString()
-      );
+      
+const courseExistInUser = user.courses.some(
+  (course: any) =>
+    String(course.courseId ?? course._id) === String(courseId)
+);
 
-      if (courseExistInUser) {
-        return next(
-          new ErrorHandler(
-            "You have already purchased this course",
-            400
-          )
-        );
-      }
+if (courseExistInUser) {
+  return next(
+    new ErrorHandler(
+      "You have already purchased this course",
+      409
+    )
+  );
+}
 
       // 4. Find course
       const course = await CourseModel.findById(courseId);
@@ -186,24 +186,64 @@ export const sendStripePublishableKey =CatchAsyncError(async(req:Request,res:Res
 })
 
 //NEW PAYMENT
-export const newPayment =CatchAsyncError(async(req:Request,res:Response, next:NextFunction )=>{
-    try{
+
+export const newPayment = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { amount, courseId } = req.body;
+
+      if (!courseId) {
+        return next(new ErrorHandler("Course ID is required", 400));
+      }
+
+      const user = await userModel.findById(req.user?._id);
+
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+
+      const alreadyPurchased = user.courses.some(
+        (item: any) =>
+          String(item.courseId ?? item._id) === String(courseId)
+      );
+
+      if (alreadyPurchased) {
+        return next(
+          new ErrorHandler("You have already purchased this course", 409)
+        );
+      }
+
+      const course = await CourseModel.findById(courseId);
+
+      if (!course) {
+        return next(new ErrorHandler("Course not found", 404));
+      }
+
+      const expectedAmount = Math.round(Number(course.price) * 100);
+
+      if (!Number.isFinite(Number(amount)) || Number(amount) !== expectedAmount) {
+        return next(new ErrorHandler("Invalid payment amount", 400));
+      }
+
       const myPayment = await stripe.paymentIntents.create({
-        amount: req.body.amount,
-        currency:"USD",
-        metadata:{
-          company:"E-Learning",
+        amount: expectedAmount,
+        currency: "USD",
+        metadata: {
+          company: "E-Learning",
+          courseId: String(course._id),
+          userId: String(user._id),
         },
-        automatic_payment_methods:{
-          enabled:true,
-        }
+        automatic_payment_methods: {
+          enabled: true,
+        },
       });
 
-    res.status(200).json({
-      success: true,
-      client_secret: myPayment.client_secret
-    })
-    }catch (error: any) {
+      return res.status(200).json({
+        success: true,
+        client_secret: myPayment.client_secret,
+      });
+    } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }
-})
+  }
+);

@@ -151,21 +151,30 @@ export const getAllCourses = CatchAsyncError(
 //get course content -- only foe valid user
 export const getCourseByUser= CatchAsyncError(async(req:Request,res:Response, next:NextFunction)=>{
     try{
-const userCourseList= req.user?.courses;
-const courseId= req.params.id;
+       
+const userCourseList = req.user?.courses;
+const courseId = String(req.params.id);
 
-const courseExists= userCourseList?.find((course:any)=> course._id.toString() === courseId.toString());
+const courseExists = userCourseList?.some(
+  (course: any) => String(course.courseId ?? course._id) === courseId
+);
 
-if(!courseExists){
-      return next(new ErrorHandler("you are not eligibal for this course", 404));
+if (!courseExists) {
+  return next(
+    new ErrorHandler("You are not eligible for this course", 404)
+  );
 }
-const course= await CourseModel.findById(courseId);
-const content= course?.courseData;
 
- res.status(200).json({
-        success: true,
-        content,
-      });
+const course = await CourseModel.findById(courseId);
+
+if (!course) {
+  return next(new ErrorHandler("Course not found", 404));
+}
+
+res.status(200).json({
+  success: true,
+  content: course.courseData,
+});
     }catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }
@@ -302,8 +311,11 @@ export const addReview= CatchAsyncError(async(req:Request, res:Response, next:Ne
    const courseId= req.params.id;
 
    //check if courseId already exist in userCourseList based on_id
-   const courseExists= userCourseList?.some((course:any)=>course._id.toString() === courseId.toString());
-
+   const courseExists = userCourseList?.some(
+  (course: any) =>
+    course.courseId?.toString() === courseId.toString() ||
+    course._id?.toString() === courseId.toString()
+);
    if(!courseExists){
       return next(new ErrorHandler("You are not eligible to access this course",404));
    }
@@ -440,23 +452,59 @@ export const getCourseAnalytics =CatchAsyncError(async(req:Request,res:Response,
 })
 
 //gemerate video url
-export const generateVideoUrl = CatchAsyncError(async(req:Request,res:Response,next:NextFunction)=>{
-  try{
-    const {videoId} = req.body;
-    const response = await axios.post(
-      `https://dev.vdocipher.com/api/videos/${videoId}/otp`,
-      {ttl: 300},
-      {
-         headers:{
-          Accept: 'application/json',
-          'Content-Type':'application/json',
-          Authorization:`Apisecret ${process.env.VIDEOCIPHER_API_SECRET}`,
-         },
+
+export const generateVideoUrl = CatchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { videoId } = req.body;
+
+      if (!videoId) {
+        return res.status(400).json({
+          success: false,
+          message: "Video ID is required",
+        });
       }
-    );
-    res.json(response.data);
-  }catch (error: any) {
-      return next(new ErrorHandler(error.message, 500));
+
+      const apiSecret = process.env.VIDEOCIPHER_API_SECRET;
+
+      if (!apiSecret) {
+        console.error("VdoCipher API secret is missing");
+
+        return res.status(500).json({
+          success: false,
+          message: "Video service is not configured",
+        });
+      }
+
+      const response = await axios.post(
+        `https://dev.vdocipher.com/api/videos/${encodeURIComponent(videoId)}/otp`,
+        { ttl: 300 },
+        {
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Apisecret ${apiSecret}`,
+          },
+        }
+      );
+
+      return res.status(200).json(response.data);
+    } catch (error: any) {
+      console.error(
+        "VdoCipher status:",
+        error.response?.status
+      );
+      console.error(
+        "VdoCipher response:",
+        error.response?.data
+      );
+
+      return res.status(error.response?.status || 500).json({
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "Failed to generate video OTP",
+      });
     }
-  
-})
+  }
+);

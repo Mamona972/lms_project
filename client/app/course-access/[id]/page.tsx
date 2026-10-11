@@ -23,24 +23,33 @@ useEffect(() => {
   skip: !mounted,
 });
 
-    useEffect(()=>{
-        if(data){
-        const isPurchased = data.user.courses.find((item:any)=>item._id ===id);
-        if(!isPurchased){
-            router.push("/")
-        }
-        if(error){
-            router.push("/")
-        }
-        }
-    },[data,error])
+    
+useEffect(() => {
+  if (!mounted || isLoading) return;
+
+  if (error || !data?.user) {
+    router.push("/");
+    return;
+  }
+
+  const isPurchased = data.user.courses?.some(
+    (item: any) =>
+      String(item.courseId || item._id || item.id) === String(id)
+  );
+
+  if (!isPurchased) {
+    router.push("/");
+  }
+}, [mounted, isLoading, data, error, id, router]);
+
+
   return (
    <>{
     isLoading ?(
      <Loader/>
     ):(
         <div>
-            <CourseContent  id={id} user={data.user}/>
+            <CourseContent  id={id} user={data?.user}/>
         </div>
     )
    }

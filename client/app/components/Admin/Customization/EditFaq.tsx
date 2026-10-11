@@ -19,7 +19,7 @@ const EditFaq = (props: Props) => {
 
   useEffect(() => {
     if (data) {
-      setQuestions(data.layout.faq);
+      setQuestions(data?.layout?.faq);
     }
     if(layoutSuccess){
         toast.success("FAQ updated successfully");
@@ -89,7 +89,7 @@ const handleEdit = async () => {
             <div className="w-[90%] 800px:w-[80%] m-auto mt-[120px] relative">
       <div className="mt-12">
         <dl className="space-y-8">
-          {questions.map((q: any) => (
+          {questions?.map((q: any) => (
             <div
               key={q._id}
               className={`${

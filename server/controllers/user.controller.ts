@@ -174,55 +174,64 @@ export const logoutUser = CatchAsyncError(
   },
 );
 
-//update the access tokenn
+
 export const updateAccessToken = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const refresh_token = req.cookies.refresh_token as string;
+      const refreshToken = req.cookies?.refresh_token;
+
+      if (!refreshToken) {
+        return next(
+          new ErrorHandler("Refresh token missing. Please login again.", 401)
+        );
+      }
+
       const decoded = jwt.verify(
-        refresh_token,
-        process.env.REFRESH_TOKEN as string,
+        refreshToken,
+        process.env.REFRESH_TOKEN as string
       ) as JwtPayload;
 
-      const message = "Could not refresh token";
-      if (!decoded) {
-        return next(new ErrorHandler(message, 400));
+      if (!decoded?.id) {
+        return next(new ErrorHandler("Invalid refresh token", 401));
       }
-      const session = await redis.get(decoded.id as string);
+
+      const session = await redis.get(decoded.id.toString());
+
       if (!session) {
-        return next(new ErrorHandler("please login for access this resource", 400));
+        return next(
+          new ErrorHandler("Session expired. Please login again.", 401)
+        );
       }
+
       const user = JSON.parse(session);
 
       const accessToken = jwt.sign(
         { id: user._id },
         process.env.ACCESS_TOKEN as string,
-        {
-          expiresIn: "5m",
-        },
+        { expiresIn: "5m" }
       );
-      const refreshToken = jwt.sign(
+
+      const newRefreshToken = jwt.sign(
         { id: user._id },
         process.env.REFRESH_TOKEN as string,
-        {
-          expiresIn: "3d",
-        },
+        { expiresIn: "3d" }
       );
 
       req.user = user;
 
       res.cookie("access_token", accessToken, accessTokenOptions);
-      res.cookie("refresh_token", refreshToken, refreshTokenOptions);
- 
-      await redis.set(user._id, JSON.stringify(user), "EX", 604800); //7 days 
-      
-      next();
-    } catch (error: any) {
-      return next(new ErrorHandler(error.message, 400));
-    }
-  },
-);
+      res.cookie("refresh_token", newRefreshToken, refreshTokenOptions);
 
+      await redis.set(user._id.toString(), JSON.stringify(user), "EX", 604800);
+
+      next();
+    } catch (error) {
+      return next(
+        new ErrorHandler("Session expired or invalid. Please login again.", 401)
+      );
+    }
+  }
+);
 //get user info
 export const getUserInfo = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {

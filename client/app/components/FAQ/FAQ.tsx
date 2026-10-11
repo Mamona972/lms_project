@@ -14,7 +14,7 @@ const FAQ = (props: Props) => {
 
   useEffect(() => {
     if (data) {
-      setQuestions(data.layout.faq);
+      setQuestions(data?.layout?.faq);
     }
   }, [data]);
 
@@ -30,7 +30,7 @@ const FAQ = (props: Props) => {
   </h1>
   <div className="mt-12">
     <dl className="space-y-8">
-      {questions.map((q) => (
+      {questions?.map((q) => (
         <div key={q._id}
           className={`_${
             q._id !== questions[0]?._id && "border-t" 

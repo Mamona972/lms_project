@@ -41,9 +41,12 @@ const { data: userData } = useLoadUserQuery(undefined, {
 
   const discountPercentengePrice = dicountPercentenge.toFixed(0);
 
-  const isPurchased =
-    user && user?.courses?.find((item: any) => item._id === data._id);
-
+ const isPurchased = Boolean(
+  user?.courses?.some(
+    (item: any) =>
+      String(item.courseId ?? item._id) === String(data._id)
+  )
+);
   const handleOrder = (e: any) => {
     if(user){
       setOpen(true);
@@ -237,20 +240,20 @@ const { data: userData } = useLoadUserQuery(undefined, {
               </div>
               <div className="flex items-center">
                 {isPurchased ? (
-                  <Link
-                    className={`${styles.button} !w-[180px] my-3 font-Poppins cursor-pointer !bg-[crimson]`}
-                    href={`/course-access/${data._id}`}
-                  >
-                    Enter to Course
-                  </Link>
-                ) : (
-                  <div
-                    className={`${styles.button} !w-[180px] my-3 font-Poppins cursor-pointer !bg-[crimson]`}
-                    onClick={handleOrder}
-                  >
-                    Buy Now {data.price}$
-                  </div>
-                )}
+  <Link
+    className={`${styles.button} !w-[180px] my-3 font-Poppins cursor-pointer !bg-[crimson]`}
+    href={`/course-access/${data._id}`}
+  >
+    Enter to Course
+  </Link>
+) : (
+  <div
+    className={`${styles.button} !w-[180px] my-3 font-Poppins cursor-pointer !bg-[crimson]`}
+    onClick={handleOrder}
+  >
+    Buy Now {data.price}$
+  </div>
+)}
               </div>
               <br />
               <p className="pb-1 text-black dark:text-white">
