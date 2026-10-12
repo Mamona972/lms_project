@@ -1,6 +1,7 @@
 import express, { NextFunction,Request,Response  } from 'express';
 require("dotenv").config();
 export const app=express();
+import connectDB from './utils/db';
 import cors from 'cors';
 import cookieParser from 'cookie-parser'
 import {ErrorMiddleware}  from "./middleware/error"
@@ -17,6 +18,20 @@ app.use(express.json({limit: '50mb'}))   //this is important for cloudinary
 
 //cookie parser
 app.use(cookieParser());
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database unavailable:", error);
+
+    res.status(503).json({
+      success: false,
+      message: "Database connection failed",
+    });
+  }
+});
 
 //cors
 app.use(cors({
