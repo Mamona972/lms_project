@@ -57,3 +57,5 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
 app.use(limiter)
 
 app.use(ErrorMiddleware);
+
+export default app;
