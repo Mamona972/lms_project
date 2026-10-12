@@ -36,7 +36,7 @@ app.use(async (req, res, next) => {
 //cors
 app.use(cors({
     origin: ['http://localhost:3000',
-        "https://lms-project-three-navy.vercel.app"
+        "https://lms-project-f9afe9yaa-mamona-s-projects.vercel.app"
     ],
     credentials:true,
 }))
